@@ -128,6 +128,8 @@ class cDClient extends Client {
                 }
             }
 
+            let data;
+
             if (logOptions.status)
                 console.log(
                     `🔁 Deleting ${toDelete.length} global commands...`
