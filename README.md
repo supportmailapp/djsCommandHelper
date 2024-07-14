@@ -32,16 +32,16 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     ignore: true, // If set to true, this command will not ignored when refreshing all commands
     guildIds: ["1234567890"], // If set, the command will be registered/updated in all guilds | You need to manually delete this
-	data: new SlashCommandBuilder() // Your command data
-		.setName('ping')
-		.setDescription('Replies with Pong!'),
-	run: async (interaction) => { // The function to call whenever the command is executed
-		await interaction.reply('Pong!');
-	},
+    data: new SlashCommandBuilder() // Your command data
+        .setName('ping')
+        .setDescription('Replies with Pong!'),
+    run: async (interaction) => { // The function to call whenever the command is executed
+        await interaction.reply('Pong!');
+    },
     // Other option
     async run(interaction) => { // The function to call whenever the command is executed
-		await interaction.reply('Pong!');
-	},
+        await interaction.reply('Pong!');
+    },
 };
 ```
 
