@@ -184,11 +184,9 @@ class cDClient extends Client {
                 for (let command of privateCommands) {
                     for (gid of command.guildIds) {
                         if (
+                            !clientGuilds ||
                             (clientGuilds &&
-                                clientGuilds.find(
-                                    (guild) => guild.id === gid
-                                )) ||
-                            !clientGuilds
+                                clientGuilds.find((guild) => guild.id === gid))
                         ) {
                             try {
                                 data = await rest.post(
@@ -199,17 +197,17 @@ class cDClient extends Client {
                                 );
                                 if (logOptions.updated)
                                     console.log(
-                                        `✔️ Updated command '${command.data.name}' in guild ${gid}.`
+                                        `✔️ Updated command '${command.data.name}' in guild '${gid}'.`
                                     );
                                 updatedPrivates++;
                             } catch (err) {
                                 console.error(
-                                    `❌ Couldn't update '${command.data.name}'; Maybe the guild ${gid} wasn't found in the current guilds.`
+                                    `❌ Couldn't update '${command.data.name}'; Maybe the guild '${gid}' wasn't found in the current guilds.`
                                 );
                             }
                         } else {
-                            console.error(
-                                `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
+                            console.warn(
+                                `⚠️ Couldn't update '${command.data.name}' since guild '${gid}' wasn't found in the current guilds.`
                             );
                         }
                     }
@@ -254,7 +252,7 @@ class cDClient extends Client {
 
                 if (!theCommand) {
                     console.error(
-                        `Command '${command}' not found in guild '${guildId}'`
+                        `❌ Command '${command}' not found in guild '${guildId}'`
                     );
                     return;
                 }
@@ -263,13 +261,13 @@ class cDClient extends Client {
             }
         } catch (err) {
             console.error(
-                `Error while deleting a command in guild '${guildId}'`,
+                `❌ Error while deleting a command in guild '${guildId}'`,
                 err
             );
         }
         return;
     }
-};
+}
 
 module.exports = cDClient;
 
