@@ -1,7 +1,7 @@
-const { Client: DClient } = require("@discordjs/core");
-const { REST } = require("@discordjs/rest");
-const { readdirSync, PathLike } = require("node:fs");
-const path = require("node:path");
+import { Client, ClientOptions } from "@discordjs/core";
+import { REST } from "@discordjs/rest";
+import { readdirSync } from "node:fs";
+import "node:path";
 
 const DEFAULT_OPTS = {
     ignored: true,
@@ -11,21 +11,27 @@ const DEFAULT_OPTS = {
     noLogs: false,
 };
 
+// TODO: Error "Client is not a constructor"
+
 /**
  * A Discord Client, that is basically [discord.js' ``Client``](https://discord.js.org/docs/packages/discord.js/main/Client:Class) but with two functions added for command handling.
  */
-class Client extends DClient {
+module.exports = class cDClient extends Client {
     /**
      * Create, update and delete global and guild application commands.
      *
      * To update guild-specific commands correctly, make sure the bot is logged in.\
      * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
      *
-     * @param {PathLike} folderPath The relative path to your commands folder (the command files have to be directly in it!)
+     * @param {string} folderPath The relative path to your commands folder (the command files have to be directly in it!)
      * @param {string} token The bot's token (if the client isn't logged in yet)
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
-    async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
+    async deployCommands(
+        folderPath = "./commands/utility",
+        token = null,
+        logOptions = DEFAULT_OPTS
+    ) {
         if (!(this.token || token || this.isReady())) {
             console.error(
                 "Either token must be given or the client must be logged in!"
@@ -39,14 +45,14 @@ class Client extends DClient {
             logOptions.updated = false;
             logOptions.deleted = false;
         }
-        logOptions = Object.assign({}, DEFAULT_OPTS, opts || {});
+        logOptions = Object.assign({}, DEFAULT_OPTS, logOptions || {});
 
         if (!this.isReady()) {
             console.error("The client isn't logged in!");
             return;
         }
 
-        const clientId = client.user.id;
+        const clientId = this.user.id;
         let commands = [];
         let privateCommands = [];
 
@@ -64,7 +70,7 @@ class Client extends DClient {
                 );
                 continue;
             } else if (Boolean(command.ignore || false)) {
-                if (logOptions.ingored)
+                if (logOptions.ignored)
                     console.log(`- Command '${command.name}' is ignored!`);
                 continue;
             }
@@ -80,7 +86,7 @@ class Client extends DClient {
         }
 
         let rest;
-        if (client) {
+        if (this.token) {
             rest = client.rest;
         } else {
             rest = new REST().setToken(token);
@@ -221,9 +227,7 @@ class Client extends DClient {
         }
         return;
     }
-}
-
-module.exports = Client;
+};
 
 function deepEqual(obj1, obj2) {
     if (obj1 === obj2) {

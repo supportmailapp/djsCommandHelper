@@ -5,8 +5,8 @@ A simple, easy to use module that houses a Discord Client class that has two add
 ## Installation
 
 ```bash
-npm i git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
-npm i djs-command-deployer
+npm install git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
+npm install djs-command-deployer
 ```
 
 ## Usage
@@ -58,7 +58,7 @@ module.exports = {
 ```js
 const { Events, GatewayIntentBits } = require("discord.js");
 // Name it whatever you want
-const CommandClient = require("djsCommandDeployer");
+const Client = require("djs-command-deployer");
 
 const { token } = require("./config.json");
 
