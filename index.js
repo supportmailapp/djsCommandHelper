@@ -1,4 +1,4 @@
-const { Client } = require("@discordjs/core");
+const { Client: DClient } = require("@discordjs/core");
 const { REST } = require("@discordjs/rest");
 const { readdirSync, PathLike } = require("node:fs");
 const path = require("node:path");
@@ -12,196 +12,220 @@ export const DEFAULT_OPTS = {
 };
 
 /**
- * Create, update and delete global and guild application commands.
- *
- * @param {PathLike} folderPath The relative path to your commands folder (the command files have to be directly in it!)
- * @param {Client} client The client/bot
- *
- * To update guild-specific commands correctly, provide this parameter.\
- * Otherwise the built-in check for a guild ID is omitted, and you could make pointless requests which can also result in an error
- * @param {string} token The bot's token
- * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
+ * A Discord Client, that is basically [discord.js' ``Client``](https://discord.js.org/docs/packages/discord.js/main/Client:Class) but with two functions added for command handling.
  */
-
-export async function deployCommands(
-    folderPath,
-    client = null,
-    token = null,
-    logOptions = DEFAULT_OPTS
-) {
-    if (!(client || token)) {
-        console.error("Either the client or token must be given!");
-        return;
-    }
-
-    if (logOptions.noLogs) {
-        logOptions.ignored = false;
-        logOptions.created = false;
-        logOptions.updated = false;
-        logOptions.deleted = false;
-    }
-    logOptions = Object.assign({}, DEFAULT_OPTS, opts || {});
-
-    if (!client.isReady()) {
-        console.error("The client isn't logged in!");
-        return;
-    }
-
-    const clientId = client.user.id;
-    let commands = [];
-    let privateCommands = [];
-
-    const commandsPath = path.join(__dirname, folderPath);
-    const commandFiles = readdirSync(commandsPath).filter((file) =>
-        file.endsWith(".js")
-    );
-
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
-        if (!("data" in command) || !("run" in command)) {
-            console.error(
-                `- Command '${command.name}' is missing the 'data' or 'run' property!`
-            );
-            continue;
-        } else if (Boolean(command.ignore || false)) {
-            if (logOptions.ingored)
-                console.log(`- Command '${command.name}' is ignored!`);
-            continue;
+class Client extends DClient {
+    /**
+     * Create, update and delete global and guild application commands.
+     *
+     * To update guild-specific commands correctly, make sure the bot is logged in.\
+     * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
+     *
+     * @param {PathLike} folderPath The relative path to your commands folder (the command files have to be directly in it!)
+     * @param {string} token The bot's token
+     * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
+     */
+    async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
+        if (!(this.token || token || this.isReady())) {
+            console.error("Either token must be given or the client must be logged in!");
+            return;
         }
 
-        if ((command.guildIds || []).length > 0) {
-            privateCommands.push({
-                data: command.data,
-                guildIds: command.guildIds,
-            });
-        } else {
-            commands.push(command.data);
+        if (logOptions.noLogs) {
+            logOptions.ignored = false;
+            logOptions.created = false;
+            logOptions.updated = false;
+            logOptions.deleted = false;
         }
-    }
+        logOptions = Object.assign({}, DEFAULT_OPTS, opts || {});
 
-    let rest;
-    if (client) {
-        rest = client.rest;
-    } else {
-        rest = new REST().setToken(token);
-    }
+        if (!this.isReady()) {
+            console.error("The client isn't logged in!");
+            return;
+        }
 
-    try {
-        if (logOptions.status)
-            console.log(
-                `🔁 Started refreshing ${commands.length} global and ${privateCommands.length} guild commands.`
-            );
+        const clientId = client.user.id;
+        let commands = [];
+        let privateCommands = [];
 
-        // TODO: Update it to client.application.commands and fetch
-        let currentCommands = client.application.commands.cache;
-        if (!currentCommands)
-            if (client) {
-                currentCommands = await client.application.commands.fetch();
-            } else {
-                currentCommands = await rest.get(
-                    `/applications/${clientId}/commands`
+        const commandsPath = path.join(__dirname, folderPath);
+        const commandFiles = readdirSync(commandsPath).filter((file) =>
+            file.endsWith(".js")
+        );
+
+        for (const file of commandFiles) {
+            const filePath = path.join(commandsPath, file);
+            const command = require(filePath);
+            if (!("data" in command) || !("run" in command)) {
+                console.error(
+                    `- Command '${command.name}' is missing the 'data' or 'run' property!`
                 );
+                continue;
+            } else if (Boolean(command.ignore || false)) {
+                if (logOptions.ingored)
+                    console.log(`- Command '${command.name}' is ignored!`);
+                continue;
             }
 
-        const _new = [];
-        const updated = [];
-        const toDelete = [];
-        let data, gid;
-
-        // Initialising
-        for (const command of commands) {
-            if (!currentCommands.some((c) => c.name == command.name)) {
-                _new.push(command);
-            }
-        }
-
-        for (const command of commands) {
-            const currentCommand = currentCommands.find(
-                (c) => c.name === command.name
-            );
-            if (currentCommand && !deepEqual(command, currentCommand)) {
-                updated.push(command);
+            if ((command.guildIds || []).length > 0) {
+                privateCommands.push({
+                    data: command.data,
+                    guildIds: command.guildIds,
+                });
+            } else {
+                commands.push(command.data);
             }
         }
 
-        for (const currentCommand of currentCommands) {
-            if (!commands.some((c) => c.name == currentCommand.name)) {
-                toDelete.push(currentCommand);
-            }
+        let rest;
+        if (client) {
+            rest = client.rest;
+        } else {
+            rest = new REST().setToken(token);
         }
 
-        if (logUpdates)
-            console.log(`🔁 Deleting ${toDelete.length} global commands...`);
-        for (let cmd of toDelete) {
-            await rest.delete(`/applications/${clientId}/commands/${cmd.id}`);
-            if (logUpdates) console.log(`✔️ Deleted '${cmd.name}'`);
-        }
+        try {
+            if (logOptions.status)
+                console.log(
+                    `🔁 Started refreshing ${commands.length} global and ${privateCommands.length} guild commands.`
+                );
 
-        if (logUpdates)
-            console.log(`🔁 Creating ${_new.length} global commands...`);
-        for (let cmd of _new) {
-            data = await rest.post(`/applications/${clientId}/commands`, {
-                body: cmd,
-            });
-            if (logUpdates) console.log(`✔️ Created '${cmd.name}'`);
-        }
+            // TODO: Update it to client.application.commands and fetch
+            let currentCommands = client.application.commands.cache;
+            if (!currentCommands)
+                if (client) {
+                    currentCommands = await client.application.commands.fetch();
+                } else {
+                    currentCommands = await rest.get(
+                        `/applications/${clientId}/commands`
+                    );
+                }
 
-        if (logUpdates)
-            console.log(`🔁 Updating ${updated.length} global commands...`);
-        data = await rest.put(`/applications/${client.id}/commands`, {
-            body: updated,
-        });
-        if (logUpdates)
-            updated.forEach((cmd) =>
-                console.log(`✔️ Updated '${cmd.name}' global commands.`)
-            );
+            const _new = [];
+            const updated = [];
+            const toDelete = [];
+            let data, gid;
 
-        if (privateCommands.length) {
-            // TODO: Add support for sharding
-
-            let clientGuilds = [];
-
-            // TODO: Only do this, if the client is present so that no client is needed
-            // Wait for the guilds to cache before continuing
-            while (!client.guilds.cache.size) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-            clientGuilds = client.guilds.cache;
-
-            if (logUpdates) console.log(`🔁 Updating guild commands...`);
-            let updatedPrivates = 0;
-            for (let command of privateCommands) {
-                for (gid of command.guildIds) {
-                    // TODO: Only check the bot's guilds if they are present + make
-                    if (clientGuilds.find((guild) => guild.id === gid)) {
-                        data = await rest.post(
-                            `/applications/${clientId}/guilds/${gid}/commands`,
-                            {
-                                body: command.data,
-                            }
-                        );
-                        if (logUpdates)
-                            console.log(
-                                `✔️ Updated command '${command.data.name}' in guild ${gid}.`
-                            );
-                        updatedPrivates++;
-                    } else {
-                        if (logUpdates)
-                            console.log(
-                                `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
-                            );
-                    }
+            // Initialising
+            for (const command of commands) {
+                if (!currentCommands.some((c) => c.name == command.name)) {
+                    _new.push(command);
                 }
             }
-            if (logOptions.status)
-                console.log(`✅ Updated ${updatedPrivates} guild commands.`);
+
+            for (const command of commands) {
+                const currentCommand = currentCommands.find(
+                    (c) => c.name === command.name
+                );
+                if (currentCommand && !deepEqual(command, currentCommand)) {
+                    updated.push(command);
+                }
+            }
+
+            for (const currentCommand of currentCommands) {
+                if (!commands.some((c) => c.name == currentCommand.name)) {
+                    toDelete.push(currentCommand);
+                }
+            }
+
+            if (logUpdates)
+                console.log(
+                    `🔁 Deleting ${toDelete.length} global commands...`
+                );
+            for (let cmd of toDelete) {
+                await rest.delete(
+                    `/applications/${clientId}/commands/${cmd.id}`
+                );
+                if (logUpdates) console.log(`✔️ Deleted '${cmd.name}'`);
+            }
+
+            if (logUpdates)
+                console.log(`🔁 Creating ${_new.length} global commands...`);
+            for (let cmd of _new) {
+                data = await rest.post(`/applications/${clientId}/commands`, {
+                    body: cmd,
+                });
+                if (logUpdates) console.log(`✔️ Created '${cmd.name}'`);
+            }
+
+            if (logUpdates)
+                console.log(`🔁 Updating ${updated.length} global commands...`);
+            data = await rest.put(`/applications/${client.id}/commands`, {
+                body: updated,
+            });
+            if (logUpdates)
+                updated.forEach((cmd) =>
+                    console.log(`✔️ Updated '${cmd.name}' global commands.`)
+                );
+
+            if (privateCommands.length) {
+                // TODO: Add support for sharding
+
+                let clientGuilds = [];
+
+                // TODO: Only do this, if the client is present so that no client is needed
+                // Wait for the guilds to cache before continuing
+                while (!client.guilds.cache.size) {
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                }
+                clientGuilds = client.guilds.cache;
+
+                if (logUpdates) console.log(`🔁 Updating guild commands...`);
+                let updatedPrivates = 0;
+                for (let command of privateCommands) {
+                    for (gid of command.guildIds) {
+                        // TODO: Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
+                        if (clientGuilds.find((guild) => guild.id === gid)) {
+                            data = await rest.post(
+                                `/applications/${clientId}/guilds/${gid}/commands`,
+                                {
+                                    body: command.data,
+                                }
+                            );
+                            if (logUpdates)
+                                console.log(
+                                    `✔️ Updated command '${command.data.name}' in guild ${gid}.`
+                                );
+                            updatedPrivates++;
+                        } else {
+                            if (logUpdates)
+                                console.log(
+                                    `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
+                                );
+                        }
+                    }
+                }
+                if (logOptions.status)
+                    console.log(
+                        `✅ Updated ${updatedPrivates} guild commands.`
+                    );
+            }
+        } catch (error) {
+            console.error("Error while deploying commands", error);
         }
-    } catch (error) {
-        console.error("Error", error);
+        return;
     }
-    return;
+
+    /**
+     *
+     * @param {string} command The commands's name or ID | the name will be parsed first
+     * @param {*} guildId The guild's ID to delete the command in
+     * @returns {Promise<void>}
+     */
+    async deleteGuildCommand(commandName, guildId) {
+        try {
+            if (!this.isReady()) {
+                console.error("The client isn't logged in!");
+                return;
+            }
+        } catch (err) {
+            console.error("Error while deleting a guild command", error);
+        }
+        return;
+    }
 }
+
+module.exports = Client;
 
 function deepEqual(obj1, obj2) {
     if (obj1 === obj2) {
