@@ -91,7 +91,7 @@ class cDClient extends Client {
                     `🔁 Started refreshing ${commands.length} global and ${privateCommands.length} guild commands.`
                 );
 
-            // TODO: Update it to client.application.commands and fetch
+            // TODO: Fix that currentCommands is correct
             let currentCommands = this.application.commands.cache;
             if (!currentCommands.size)
                 if (this.isReady()) {

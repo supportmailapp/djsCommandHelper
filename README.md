@@ -16,6 +16,7 @@ npm install djs-command-deployer
 _The `src` folder it can be any folder. Just the `commands` folder should be a subfolder of the directory your `index.js` is located in._
 
 **Example:**
+
 ```
 📂src
  ┣ 📄index.js
@@ -110,7 +111,9 @@ Please see [the example code](https://github.com/The-LukeZ/djs-command-deployer-
 
 ### TODO
 
--   [ ] L168 | Add support for sharding
+-   [ ] L94 | Fix that currentCommands is correct (currently doesn't work and therefore checking for current commands doesn't really work)
+
+-   [ ] L166 | Add support for sharding
 
 -   [ ] Finish `this.deleteCommand`
 
