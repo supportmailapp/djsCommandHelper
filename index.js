@@ -1,4 +1,4 @@
-const { Client, REST } = require("discord.js");
+const { Client, REST, Collection, Routes } = require("discord.js");
 const { readdirSync } = require("node:fs");
 const path = require("node:path");
 
@@ -167,7 +167,7 @@ class cDClient extends Client {
 
                 let clientGuilds = [];
 
-                if (!this.isReady()) {
+                if (!this.isReady() || this.ws.status != 5) {
                     // Wait for the guilds to cache before continuing
                     while (!this.guilds.cache.size) {
                         await new Promise((resolve) =>
@@ -228,41 +228,49 @@ class cDClient extends Client {
      *
      * @param {string} command The commands's name or ID
      * @param {string | null} guildId The guild's ID to delete the command in (not needed for a global command)
-     * @returns {Promise<void>}
+     * @param {Collection | null} commands The command-map like explained [in the guide](https://discordjs.guide/creating-your-bot/command-handling). This is important when using only the name of the command (the command name needs to be associated with the command id)
+     * @returns {Promise<boolean>} `true` if the operation was successfull. Otherwise an error will be raised.
      */
-    async deleteCommand(command, guildId = null) {
-        if (!this.isReady()) {
-            console.error("The client must be logged in!");
-            return;
+    async deleteCommand(command, guildId = null, commands = new Collection()) {
+        if (!this.isReady() || !this.ws.status == 0) {
+            throw new Error("The client must be logged in!");
         } else if (guildId && !/^\d+$/i.test(guildId)) {
-            console.error("The guildId is invalid! Must be a numerous string.");
-            return;
+            throw new Error(
+                "The guildId is invalid! Must be a numerous string."
+            );
         }
 
         try {
             if (/^\d+$/i.test(command)) {
                 await this.application.commands.delete(command, guildId);
             } else {
-                const theCommand =
-                    this.application.commands.cache.get(command) ??
-                    (await this.application.commands.fetch({
-                        guildId: guildId,
-                        cache: true,
-                    }));
+                let theCommand = commands.find((cmd) => cmd.name === command);
+                if (!theCommand) {
+                    const commands = await this.rest.get(
+                        Routes.applicationGuildCommands(
+                            this.application.id,
+                            guildId
+                        )
+                    );
+
+                    theCommand = commands.find((cmd) => cmd.name === command);
+                }
 
                 if (!theCommand) {
-                    console.error(
+                    throw new Error(
                         `❌ Command '${command}' not found in guild '${guildId}'`
                     );
-                    return;
                 }
 
                 await this.application.commands.delete(theCommand.id, guildId);
             }
         } catch (err) {
             console.error(
-                `❌ Error while deleting a command in guild '${guildId}'`,
+                `❌ Error while deleting command '${command}' in guild '${guildId}':`,
                 err
+            );
+            throw new Error(
+                `Error while deleting command '${command}' in guild '${guildId}'`
             );
         }
         return;
