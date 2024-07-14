@@ -22,11 +22,9 @@ yourApp
 |       +-- private-command.js
 ```
 
-#### Creating a command
+#### The command file
 
-!> Note that for using this you need to install [discord.js](https://discordjs.guide/)!
-
-In your command file...
+! **Note that for using this you need to install [discord.js](https://discordjs.guide/)!**
 
 ```js
 const { SlashCommandBuilder } = require('discord.js');
@@ -85,12 +83,11 @@ client.login(token);
 | `deleted`   | Logs like `Deleted 'user'`                       | `true`  |
 | `noLogs`    | No logs at all (besides errors)                  | `false` |
 
-
 ### TODO
 
-[ ] L93 | Update it to client.application.commands and fetch
-[ ] L162 | Add support for sharding
-[ ] L166 | Only do this, if the client is logged in so that no client is needed
-[ ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
+[ x ] L93 | Update it to client.application.commands and fetch
+[ x ] L162 | Add support for sharding
+[ x ] L166 | Only do this, if the client is logged in so that no client is needed
+[ x ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
 
 Feel free to help me with the TODOs, I will merge any useful pull requests :)
