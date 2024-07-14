@@ -1,0 +1,16 @@
+{
+    "files": [ "index.js" ],
+    "extends": "@tsconfig/recommended/tsconfig.json",
+    "compilerOptions": {
+        "target": "ES6",
+        "allowJs": true,
+        "preserveConstEnums": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "dist",
+        "declarationMap": true
+    },
+    "typeAcquisition": {
+        "enable": true
+    }
+}
