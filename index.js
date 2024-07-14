@@ -22,12 +22,14 @@ class Client extends DClient {
      * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
      *
      * @param {PathLike} folderPath The relative path to your commands folder (the command files have to be directly in it!)
-     * @param {string} token The bot's token
+     * @param {string} token The bot's token (if the client isn't logged in yet)
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
     async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
         if (!(this.token || token || this.isReady())) {
-            console.error("Either token must be given or the client must be logged in!");
+            console.error(
+                "Either token must be given or the client must be logged in!"
+            );
             return;
         }
 
@@ -209,15 +211,11 @@ class Client extends DClient {
     /**
      *
      * @param {string} command The commands's name or ID | the name will be parsed first
-     * @param {*} guildId The guild's ID to delete the command in
+     * @param {string} guildId The guild's ID to delete the command in
      * @returns {Promise<void>}
      */
     async deleteGuildCommand(commandName, guildId) {
         try {
-            if (!this.isReady()) {
-                console.error("The client isn't logged in!");
-                return;
-            }
         } catch (err) {
             console.error("Error while deleting a guild command", error);
         }
