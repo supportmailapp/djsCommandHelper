@@ -93,14 +93,14 @@ client.login(token);
 
 ### TODO
 
--   [ ] L93 | Update it to client.application.commands and fetch
+-   [ ] L95 | Update it to client.application.commands and fetch
 
--   [ ] L162 | Add support for sharding
+-   [ ] L164 | Add support for sharding
 
--   [ ] L166 | Only do this, if the client is logged in so that no client is needed
+-   [ ] L168 | Only do this, if the client is logged in so that no client is needed
 
--   [ ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
+-   [ ] L179 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
 
--   [ ] Finish `this.deleteCommand()`
+-   [ ] Finish `this.deleteCommand`
 
 Feel free to help me with the TODOs, I will merge any useful pull requests :)
