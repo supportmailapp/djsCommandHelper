@@ -1,8 +1,11 @@
 {
     "files": [ "index.js" ],
-    "extends": "@tsconfig/recommended/tsconfig.json",
     "compilerOptions": {
         "target": "ES6",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
         "allowJs": true,
         "preserveConstEnums": true,
         "declaration": true,
@@ -14,4 +17,5 @@
     "typeAcquisition": {
         "enable": true
     },
+    "$schema": "https://json.schemastore.org/tsconfig"
 }
