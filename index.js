@@ -22,12 +22,12 @@ module.exports = class cDClient extends Client {
      * To update guild-specific commands correctly, make sure the bot is logged in.\
      * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
      *
-     * @param {string} folderPath The relative path to your commands folder (the command files have to be directly in it!)
+     * @param {string} folderPath The absolute path to your commands folder (the command files have to be directly in it!)
      * @param {string} token The bot's token (if the client isn't logged in yet)
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
     async deployCommands(
-        folderPath = "./commands/utility",
+        folderPath,
         token = null,
         logOptions = DEFAULT_OPTS
     ) {

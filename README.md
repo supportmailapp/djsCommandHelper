@@ -59,6 +59,7 @@ module.exports = {
 const { Events, GatewayIntentBits } = require("discord.js");
 // Name it whatever you want
 const Client = require("djs-command-deployer");
+const { join: pathJoin } = require("node:path");
 
 const { token } = require("./config.json");
 
@@ -74,7 +75,10 @@ client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
     // Call the CommandDeployer to refresh your commands
-    client.deployCommands("commands/utility"); // Optional: logOptions object
+    readyClient.deployCommands(
+        pathJoin(__dirname, "commands", "utility")
+        // Optional: logOptions object
+    );
 });
 
 // Log in to Discord with your client's token
