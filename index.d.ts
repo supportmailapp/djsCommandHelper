@@ -1,5 +1,13 @@
-declare module "djs-command-deployer" {
-    import { Client } from "@discordjs/core";
+import { Client } from "@discordjs/core";
 
-    export function deployCommands(client: Client, logUpdates?: boolean): null;
+export interface logOptions {
+    ignored?: boolean,
+    created?: boolean,
+    updated?: boolean,
+    deleted?: boolean,
+    noLogs?: boolean
+}
+
+declare namespace djsCommandDeployer {
+    export function deployCommands(client: Client, path: string, logOptions?: logOptions ): Promise<void>;
 }
