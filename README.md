@@ -38,8 +38,8 @@ module.exports = {
     run: async (interaction) => { // The function to call whenever the command is executed
         await interaction.reply('Pong!');
     },
-    // Other option
-    async run(interaction) => { // The function to call whenever the command is executed
+    // Other way if you dont want an anonymous function
+    async run(interaction) { // The function to call whenever the command is executed
         await interaction.reply('Pong!');
     },
 };
