@@ -12,14 +12,14 @@ npm i git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
 
 #### Folder structure
 
-```tree
-yourApp
-+-- index.js
-|
-+-- commands
-|   +-- utility
-|       +-- ping.js
-|       +-- private-command.js
+```
+📂yourApp
+ ┣ 📄index.js
+ ┃
+ ┗ 📂commands
+   ┗📂utility
+     ┣ 📄ping.js
+     ┗ 📄your-private-command.js
 ```
 
 #### The command file
@@ -31,7 +31,11 @@ const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
     ignore: true, // If set to true, this command will not ignored when refreshing all commands
-    guildIds: ["1234567890"], // If set, the command will be registered/updated in all guilds | This wont automatically delete them from guilds!
+    guildIds: [
+        // If set, the command will be registered/updated in all guilds | This wont automatically delete them from guilds!
+        "123456789",
+        "987654321",
+    ],
     data: new SlashCommandBuilder() // Your command data
         .setName("ping")
         .setDescription("Replies with Pong!"),
