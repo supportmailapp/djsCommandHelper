@@ -3,7 +3,7 @@ const { REST } = require("@discordjs/rest");
 const { readdirSync, PathLike } = require("node:fs");
 const path = require("node:path");
 
-export const DEFAULT_OPTS = {
+const DEFAULT_OPTS = {
     ignored: true,
     created: true,
     updated: true,
