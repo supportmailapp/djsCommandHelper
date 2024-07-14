@@ -6,6 +6,7 @@ A simple, easy to use module that houses a Discord Client class that has two add
 
 ```bash
 npm i git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
+npm i djs-command-deployer
 ```
 
 ## Usage
