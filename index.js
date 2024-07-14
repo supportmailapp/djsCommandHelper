@@ -14,6 +14,16 @@ const DEFAULT_OPTS = {
  * A Discord Client, that is basically [discord.js' ``Client``](https://discord.js.org/docs/packages/discord.js/main/Client:Class) but with two functions added for command handling.
  */
 module.exports = class cDClient extends Client {
+    checkForCredentials({ token }) {
+        if (!(this.token || token || this.isReady())) {
+            console.error(
+                "Either token must be given or the client must be logged in!"
+            );
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Create, update and delete global and guild application commands.
      *
@@ -25,13 +35,7 @@ module.exports = class cDClient extends Client {
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
     async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
-        if (!(this.token || token || this.isReady())) {
-            console.error(
-                "Either token must be given or the client must be logged in!"
-            );
-            return;
-        }
-
+        if (this.checkForCredentials({ token })) return;
         if (logOptions.noLogs) {
             logOptions.ignored = false;
             logOptions.created = false;
@@ -224,15 +228,49 @@ module.exports = class cDClient extends Client {
     }
 
     /**
+     * Delete an application command by its name or ID. **The client needs to be logged in!**
      *
      * @param {string} command The commands's name or ID | the name will be parsed first
      * @param {string} guildId The guild's ID to delete the command in
      * @returns {Promise<void>}
      */
-    async deleteGuildCommand(commandName, guildId) {
+    async deleteGuildCommand(command, guildId) {
+        if (!this.isReady()) {
+            console.error("The client must be logged in!");
+            return;
+        } else if (!/^\d+$/i.test(guildId)) {
+            console.error("The guildId is invalid! Must be a numerous string.");
+            return;
+        }
+
         try {
+            if (/^\d+$/i.test(command)) {
+                await this.application.commands.delete(command, guildId);
+            } else {
+                const theCommand =
+                    this.application.commands.cache.get(command) ??
+                    (await this.application.commands.fetch({
+                        guildId: guildId,
+                        cache: true,
+                    }));
+
+                if (!theCommand) {
+                    console.error(
+                        `Command '${command}' not found in guild '${guildId}'`
+                    );
+                    return;
+                }
+
+                await this.application.commands.delete(
+                    theCommand.id,
+                    guildId
+                );
+            }
         } catch (err) {
-            console.error("Error while deleting a guild command", error);
+            console.error(
+                `Error while deleting a command in guild '${guildId}'`,
+                err
+            );
         }
         return;
     }

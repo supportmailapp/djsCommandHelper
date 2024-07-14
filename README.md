@@ -85,6 +85,17 @@ client.once(Events.ClientReady, (readyClient) => {
 client.login(token);
 ```
 
+### Delete a guild-command
+
+There are two options to do this: Either with the command's ID or his name.
+
+In this example we are building a manager-command that has a StringOption for the command where one can paste in the ID or the name.\
+
+```js
+const 
+```
+
+
 #### `logOptions`
 
 | Option name | Description / Example                            | Default |
