@@ -1,1 +1,0 @@
-// A test setup for the bot

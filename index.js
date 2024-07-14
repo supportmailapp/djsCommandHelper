@@ -13,17 +13,7 @@ const DEFAULT_OPTS = {
 /**
  * A Discord Client, that is basically [discord.js' ``Client``](https://discord.js.org/docs/packages/discord.js/main/Client:Class) but with two functions added for command handling.
  */
-module.exports = class cDClient extends Client {
-    checkForCredentials({ token }) {
-        if (!(this.token || token || this.isReady())) {
-            console.error(
-                "Either token must be given or the client must be logged in!"
-            );
-            return false;
-        }
-        return true;
-    }
-
+class cDClient extends Client {
     /**
      * Create, update and delete global and guild application commands.
      *
@@ -35,7 +25,13 @@ module.exports = class cDClient extends Client {
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
     async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
-        if (this.checkForCredentials({ token })) return;
+        if (!(this.token || token || this.isReady())) {
+            console.error(
+                "Either token must be given or the client must be logged in!"
+            );
+            return;
+        }
+
         if (logOptions.noLogs) {
             logOptions.ignored = false;
             logOptions.created = false;
@@ -228,9 +224,9 @@ module.exports = class cDClient extends Client {
     }
 
     /**
-     * Delete an application command by its name or ID. **The client needs to be logged in!**
+     * Shortcut method to delete an application command by its name or ID. **The client needs to be logged in!**
      *
-     * @param {string} command The commands's name or ID | the name will be parsed first
+     * @param {string} command The commands's name or ID
      * @param {string | null} guildId The guild's ID to delete the command in (not needed for a global command)
      * @returns {Promise<void>}
      */
@@ -272,6 +268,8 @@ module.exports = class cDClient extends Client {
         return;
     }
 };
+
+module.exports = cDClient;
 
 function deepEqual(obj1, obj2) {
     if (obj1 === obj2) {

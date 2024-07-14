@@ -119,18 +119,18 @@ module.exports = {
     async run(interaction) {
         const serverId = ctx.options.getString("server-id");
         const command = ctx.options.getString("command");
-        await interaction.deferReply({ ephemeral: true })
+        await interaction.deferReply({ ephemeral: true }); // Defer to remove the risk of not responding in time
         try {
-            await interaction.client.deleteGuildCommand(command, serverId);
+            await interaction.client.deleteCommand(command, serverId);
         } catch (err) {
             console.error("Command not deleted due to", err);
             return await interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("❌ Command not deleted due to an error")
-                        .setDescription('```' + err + '```')
-                        .setColor(0xee0000);
-                ]
+                        .setDescription("```" + err + "```")
+                        .setColor(0xee0000),
+                ],
             });
         }
         await interaction.editReply("✅ Command deleted");
