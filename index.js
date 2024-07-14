@@ -26,11 +26,7 @@ module.exports = class cDClient extends Client {
      * @param {string} token The bot's token (if the client isn't logged in yet)
      * @param {DEFAULT_OPTS} logOptions Whether to log what command was ignored, created, updated or deleted
      */
-    async deployCommands(
-        folderPath,
-        token = null,
-        logOptions = DEFAULT_OPTS
-    ) {
+    async deployCommands(folderPath, token = null, logOptions = DEFAULT_OPTS) {
         if (!(this.token || token || this.isReady())) {
             console.error(
                 "Either token must be given or the client must be logged in!"
@@ -135,7 +131,7 @@ module.exports = class cDClient extends Client {
                 }
             }
 
-            if (logUpdates)
+            if (logOptions.status)
                 console.log(
                     `🔁 Deleting ${toDelete.length} global commands...`
                 );
@@ -143,24 +139,24 @@ module.exports = class cDClient extends Client {
                 await rest.delete(
                     `/applications/${clientId}/commands/${cmd.id}`
                 );
-                if (logUpdates) console.log(`✔️ Deleted '${cmd.name}'`);
+                if (logOptions.deleted) console.log(`✔️ Deleted '${cmd.name}'`);
             }
 
-            if (logUpdates)
+            if (logOptions.status)
                 console.log(`🔁 Creating ${_new.length} global commands...`);
             for (let cmd of _new) {
                 data = await rest.post(`/applications/${clientId}/commands`, {
                     body: cmd,
                 });
-                if (logUpdates) console.log(`✔️ Created '${cmd.name}'`);
+                if (logOptions.created) console.log(`✔️ Created '${cmd.name}'`);
             }
 
-            if (logUpdates)
+            if (logOptions.status)
                 console.log(`🔁 Updating ${updated.length} global commands...`);
             data = await rest.put(`/applications/${clientId}/commands`, {
                 body: updated,
             });
-            if (logUpdates)
+            if (logOptions.updated)
                 updated.forEach((cmd) =>
                     console.log(`✔️ Updated '${cmd.name}' global commands.`)
                 );
@@ -177,7 +173,8 @@ module.exports = class cDClient extends Client {
                 }
                 clientGuilds = this.guilds.cache;
 
-                if (logUpdates) console.log(`🔁 Updating guild commands...`);
+                if (logOptions.status)
+                    console.log(`🔁 Updating guild commands...`);
                 let updatedPrivates = 0;
                 for (let command of privateCommands) {
                     for (gid of command.guildIds) {
@@ -189,20 +186,19 @@ module.exports = class cDClient extends Client {
                                     body: command.data,
                                 }
                             );
-                            if (logUpdates)
+                            if (logOptions.updated)
                                 console.log(
                                     `✔️ Updated command '${command.data.name}' in guild ${gid}.`
                                 );
                             updatedPrivates++;
                         } else {
-                            if (logUpdates)
-                                console.log(
-                                    `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
-                                );
+                            console.error(
+                                `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
+                            );
                         }
                     }
                 }
-                if (logOptions.status)
+                if (logOptions.updated)
                     console.log(
                         `✅ Updated ${updatedPrivates} guild commands.`
                     );
