@@ -27,20 +27,22 @@ yourApp
 > **Note that for using this you need to install [discord.js](https://discordjs.guide/)!**
 
 ```js
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
     ignore: true, // If set to true, this command will not ignored when refreshing all commands
-    guildIds: ["1234567890"], // If set, the command will be registered/updated in all guilds | You need to manually delete this
+    guildIds: ["1234567890"], // If set, the command will be registered/updated in all guilds | This wont automatically delete them from guilds!
     data: new SlashCommandBuilder() // Your command data
-        .setName('ping')
-        .setDescription('Replies with Pong!'),
-    run: async (interaction) => { // The function to call whenever the command is executed
-        await interaction.reply('Pong!');
+        .setName("ping")
+        .setDescription("Replies with Pong!"),
+    run: async (interaction) => {
+        // The function to call whenever the command is executed
+        await interaction.reply("Pong!");
     },
     // Other way if you dont want an anonymous function
-    async run(interaction) { // The function to call whenever the command is executed
-        await interaction.reply('Pong!');
+    async run(interaction) {
+        // The function to call whenever the command is executed
+        await interaction.reply("Pong!");
     },
 };
 ```
@@ -93,5 +95,7 @@ client.login(token);
 -   [ ] L166 | Only do this, if the client is logged in so that no client is needed
 
 -   [ ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
+
+-   [ ] Finish `this.deleteCommand()`
 
 Feel free to help me with the TODOs, I will merge any useful pull requests :)
