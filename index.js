@@ -1,7 +1,7 @@
-import { Client, ClientOptions } from "@discordjs/core";
-import { REST } from "@discordjs/rest";
-import { readdirSync } from "node:fs";
-import "node:path";
+const { Client } = require("@discordjs/core");
+const { REST } = require("@discordjs/rest");
+const { readdirSync } = require("node:fs");
+const path = require("node:path");
 
 const DEFAULT_OPTS = {
     ignored: true,
