@@ -24,7 +24,7 @@ yourApp
 
 #### The command file
 
-! **Note that for using this you need to install [discord.js](https://discordjs.guide/)!**
+> **Note that for using this you need to install [discord.js](https://discordjs.guide/)!**
 
 ```js
 const { SlashCommandBuilder } = require('discord.js');
@@ -48,15 +48,16 @@ module.exports = {
 ### Deploy the commands
 
 ```js
-const { Client, Events, GatewayIntentBits } = require("discord.js");
-const CDClient = require("djsCommandDeployer");
+const { Events, GatewayIntentBits } = require("discord.js");
+// Name it whatever you want
+const CommandClient = require("djsCommandDeployer");
 
 const { token } = require("./config.json");
 
 // Set up your client like shown in (https://discordjs.guide/creating-your-bot/main-file)
 
 // Create a new client instance
-let client = new CDClient({ intents: [GatewayIntentBits.Guilds] });
+let client = new CommandClient({ intents: [GatewayIntentBits.Guilds] });
 
 // When the client is ready, run this code (only once).
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
@@ -85,9 +86,12 @@ client.login(token);
 
 ### TODO
 
-[ x ] L93 | Update it to client.application.commands and fetch
-[ x ] L162 | Add support for sharding
-[ x ] L166 | Only do this, if the client is logged in so that no client is needed
-[ x ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
+-   [ ] L93 | Update it to client.application.commands and fetch
+
+-   [ ] L162 | Add support for sharding
+
+-   [ ] L166 | Only do this, if the client is logged in so that no client is needed
+
+-   [ ] L177 | Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
 
 Feel free to help me with the TODOs, I will merge any useful pull requests :)
