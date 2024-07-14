@@ -15,6 +15,7 @@ npm install djs-command-deployer
 
 _The `src` folder it can be any folder. Just the `commands` folder should be a subfolder of the directory your `index.js` is located in._
 
+**Example:**
 ```
 📂src
  ┣ 📄index.js
@@ -94,49 +95,7 @@ There are two options to do this: Either with the command's ID or his name.
 
 In this example we are building a manager-command that has StringOptions for the command and the guild id where one can paste in the ID or the name.\
 
-````js
-const { SlashCommandBuilder } = require("discord.js");
-
-module.exports = {
-    guildIds: ["the-id-of-my-private-guild"],
-    data: new SlashCommandBuilder()
-        .setName("manage-commands")
-        .setDescription("Replies with Pong!")
-        .addStringOption((op) =>
-            op
-                .setName("command")
-                .setDescription(
-                    "The command's ID or name to be removed in the given server"
-                )
-        )
-        .addStringOption((op) =>
-            op
-                .setName("server-id")
-                .setDescription("The server's ID to remove the command from")
-        ),
-
-    // The function to call whenever the command is executed (Doesnt matter when calling client.deployCommands())
-    async run(interaction) {
-        const serverId = ctx.options.getString("server-id");
-        const command = ctx.options.getString("command");
-        await interaction.deferReply({ ephemeral: true }); // Defer to remove the risk of not responding in time
-        try {
-            await interaction.client.deleteCommand(command, serverId);
-        } catch (err) {
-            console.error("Command not deleted due to", err);
-            return await interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle("❌ Command not deleted due to an error")
-                        .setDescription("```" + err + "```")
-                        .setColor(0xee0000),
-                ],
-            });
-        }
-        await interaction.editReply("✅ Command deleted");
-    },
-};
-````
+Please see [the example code](https://github.com/The-LukeZ/djs-command-deployer-tests/blob/main/commands/command.js) for the command file and the [`index.js`](https://github.com/The-LukeZ/djs-command-deployer-tests/blob/main/index.js) on how to do this in general.
 
 #### `logOptions`
 
