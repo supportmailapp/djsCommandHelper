@@ -55,7 +55,7 @@ module.exports = class cDClient extends Client {
         let commands = [];
         let privateCommands = [];
 
-        const commandsPath = path.join(__dirname, folderPath);
+        const commandsPath = folderPath;
         const commandFiles = readdirSync(commandsPath).filter((file) =>
             file.endsWith(".js")
         );
