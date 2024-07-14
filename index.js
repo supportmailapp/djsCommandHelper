@@ -10,8 +10,6 @@ const DEFAULT_OPTS = {
     noLogs: false,
 };
 
-// TODO: Error "Client is not a constructor"
-
 /**
  * A Discord Client, that is basically [discord.js' ``Client``](https://discord.js.org/docs/packages/discord.js/main/Client:Class) but with two functions added for command handling.
  */
@@ -95,8 +93,8 @@ module.exports = class cDClient extends Client {
 
             // TODO: Update it to client.application.commands and fetch
             let currentCommands = this.application.commands.cache;
-            if (!currentCommands)
-                if (this) {
+            if (!currentCommands.size)
+                if (this.isReady()) {
                     currentCommands = await this.application.commands.fetch();
                 } else {
                     currentCommands = await rest.get(
@@ -107,7 +105,6 @@ module.exports = class cDClient extends Client {
             const _new = [];
             const updated = [];
             const toDelete = [];
-            let data, gid;
 
             // Initialising
             for (const command of commands) {
@@ -161,36 +158,53 @@ module.exports = class cDClient extends Client {
                     console.log(`✔️ Updated '${cmd.name}' global commands.`)
                 );
 
+            let gid;
+
             if (privateCommands.length) {
                 // TODO: Add support for sharding
 
                 let clientGuilds = [];
 
-                // TODO: Only do this, if the client is present so that no client is needed
-                // Wait for the guilds to cache before continuing
-                while (!this.guilds.cache.size) {
-                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                if (!this.isReady()) {
+                    // Wait for the guilds to cache before continuing
+                    while (!this.guilds.cache.size) {
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, 1000)
+                        );
+                    }
+                    clientGuilds = this.guilds.cache;
                 }
-                clientGuilds = this.guilds.cache;
 
                 if (logOptions.status)
                     console.log(`🔁 Updating guild commands...`);
+
                 let updatedPrivates = 0;
                 for (let command of privateCommands) {
                     for (gid of command.guildIds) {
-                        // TODO: Only check the bot's guilds if they are present + add something to catch an error if a guild's ID is not found
-                        if (clientGuilds.find((guild) => guild.id === gid)) {
-                            data = await rest.post(
-                                `/applications/${clientId}/guilds/${gid}/commands`,
-                                {
-                                    body: command.data,
-                                }
-                            );
-                            if (logOptions.updated)
-                                console.log(
-                                    `✔️ Updated command '${command.data.name}' in guild ${gid}.`
+                        if (
+                            (clientGuilds &&
+                                clientGuilds.find(
+                                    (guild) => guild.id === gid
+                                )) ||
+                            !clientGuilds
+                        ) {
+                            try {
+                                data = await rest.post(
+                                    `/applications/${clientId}/guilds/${gid}/commands`,
+                                    {
+                                        body: command.data,
+                                    }
                                 );
-                            updatedPrivates++;
+                                if (logOptions.updated)
+                                    console.log(
+                                        `✔️ Updated command '${command.data.name}' in guild ${gid}.`
+                                    );
+                                updatedPrivates++;
+                            } catch (err) {
+                                console.error(
+                                    `❌ Couldn't update '${command.data.name}'; Maybe the guild ${gid} wasn't found in the current guilds.`
+                                );
+                            }
                         } else {
                             console.error(
                                 `❌ Couldn't update '${command.data.name}' since guild ${gid} wasn't found in the current guilds.`
