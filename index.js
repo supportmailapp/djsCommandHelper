@@ -1,5 +1,4 @@
-const { Client } = require("@discordjs/core");
-const { REST } = require("@discordjs/rest");
+const { Client, REST } = require("discord.js");
 const { readdirSync } = require("node:fs");
 const path = require("node:path");
 
