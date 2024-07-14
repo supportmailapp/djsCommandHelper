@@ -12,8 +12,10 @@ npm i git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
 
 #### Folder structure
 
+_The `src` folder can be a subfolder in your app's main folder or it can also be the main folder or wherever the heck you want it to be._
+
 ```
-📂yourApp
+📂src
  ┣ 📄index.js
  ┃
  ┗ 📂commands
