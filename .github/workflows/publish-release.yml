@@ -1,29 +1,21 @@
-name: Publish Release
+name: Publish Package to npmjs
 on:
     release:
-        types: [released]
+        types: [published]
 jobs:
-    npm-publish:
-        name: npm publish
+    build:
         runs-on: ubuntu-latest
         permissions:
+            contents: read
             id-token: write
-        if: github.repository_owner == 'The-LukeZ'
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Install Node.js v20
-              uses: actions/setup-node@v4
+            - uses: actions/checkout@v4
+            # Setup .npmrc file to publish to npm
+            - uses: actions/setup-node@v4
               with:
-                  node-version: 20
-                  registry-url: https://registry.npmjs.org/
-
-            - name: Build dependencies
-              run: pnpm run build
-
-            - name: Publish package
-              run: |
-                  pnpm publish --provenance --no-git-checks
+                  node-version: "20.x"
+                  registry-url: "https://registry.npmjs.org"
+            - run: npm ci
+            - run: npm publish --provenance --access public
               env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

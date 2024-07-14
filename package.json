@@ -1,9 +1,9 @@
 {
   "name": "djs-command-deployer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "./index.js",
-  "scripts": {},
+  "scripts": { },
   "keywords": [
     "discord",
     "discord.js",
@@ -22,5 +22,10 @@
   "dependencies": {
     "@discordjs/core": "^1.2.0",
     "@discordjs/rest": "^2.3.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/The-LukeZ/djsCommandDeployer.git"
+  },
+  "registry": "https://npm.pkg.github.com"
 }
