@@ -1,9 +1,11 @@
 {
   "name": "djs-command-deployer",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "",
   "main": "./index.js",
-  "scripts": { },
+  "scripts": {
+    "test": "node ./tests/test.js"
+  },
   "keywords": [
     "discord",
     "discord.js",
@@ -15,14 +17,12 @@
   ],
   "author": "The-LukeZ",
   "license": "MIT",
-  "dependencies": {
-    "@discordjs/core": "^1.2.0",
-    "@discordjs/rest": "^2.3.0",
-    "discord.js": "^14.15.3"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/The-LukeZ/djsCommandDeployer.git"
   },
-  "registry": "https://npm.pkg.github.com"
+  "registry": "https://npm.pkg.github.com",
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  }
 }

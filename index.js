@@ -231,14 +231,14 @@ module.exports = class cDClient extends Client {
      * Delete an application command by its name or ID. **The client needs to be logged in!**
      *
      * @param {string} command The commands's name or ID | the name will be parsed first
-     * @param {string} guildId The guild's ID to delete the command in
+     * @param {string | null} guildId The guild's ID to delete the command in (not needed for a global command)
      * @returns {Promise<void>}
      */
-    async deleteGuildCommand(command, guildId) {
+    async deleteCommand(command, guildId = null) {
         if (!this.isReady()) {
             console.error("The client must be logged in!");
             return;
-        } else if (!/^\d+$/i.test(guildId)) {
+        } else if (guildId && !/^\d+$/i.test(guildId)) {
             console.error("The guildId is invalid! Must be a numerous string.");
             return;
         }
@@ -261,10 +261,7 @@ module.exports = class cDClient extends Client {
                     return;
                 }
 
-                await this.application.commands.delete(
-                    theCommand.id,
-                    guildId
-                );
+                await this.application.commands.delete(theCommand.id, guildId);
             }
         } catch (err) {
             console.error(

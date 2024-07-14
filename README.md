@@ -28,26 +28,32 @@ _The `src` folder it can be any folder. Just the `commands` folder should be a s
 
 > **Note that for using this you need to install [discord.js](https://discordjs.guide/)!**
 
+<details>
+<summary>Fields in the command file (Click to expand)</summary>
+
+| Key name | Description                                                                                               | Default |
+| -------- | --------------------------------------------------------------------------------------------------------- | ------- |
+| ignore   | If set to `true` then this command will be ignored upon refreshing                                        | `false` |
+| guildIds | An Array of guild ids in which the command should be registered/updated ; command is global if not set    | []      |
+| data     | The raw command data [Learn more about it here](https://discordjs.guide/creating-your-bot/slash-commands) | `-`     |
+| run      | The function to call (It's only important for your own logic - so name this whatever you want)            | `-`     |
+
+`-` means that it doesn't have a default value
+
+</details>
+
 ```js
 const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-    ignore: true, // If set to true, this command will not ignored when refreshing all commands
-    guildIds: [
-        // If set, the command will be registered/updated in all guilds | This wont automatically delete them from guilds!
-        "123456789",
-        "987654321",
-    ],
-    data: new SlashCommandBuilder() // Your command data
+    ignore: true,
+    guildIds: ["123456789", "987654321"], // Note: This wont automatically delete them from guilds!
+    data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Replies with Pong!"),
-    run: async (interaction) => {
-        // The function to call whenever the command is executed
-        await interaction.reply("Pong!");
-    },
-    // Other way if you dont want an anonymous function
+
+    // The function to call whenever the command is executed (Doesnt matter when calling client.deployCommands())
     async run(interaction) {
-        // The function to call whenever the command is executed
         await interaction.reply("Pong!");
     },
 };
@@ -60,21 +66,18 @@ const { Events, GatewayIntentBits } = require("discord.js");
 // Name it whatever you want
 const Client = require("djs-command-deployer");
 const { join: pathJoin } = require("node:path");
+require("dotenv").config();
 
-const { token } = require("./config.json");
-
-// Set up your client like shown in (https://discordjs.guide/creating-your-bot/main-file)
+// Set up your client ; use the guide for example (https://discordjs.guide/creating-your-bot/main-file)
 
 // Create a new client instance
-let client = new CommandClient({ intents: [GatewayIntentBits.Guilds] });
+let client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
 client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-    // Call the CommandDeployer to refresh your commands
+    // Call deployCommands to refresh your commands
     readyClient.deployCommands(
         pathJoin(__dirname, "commands", "utility")
         // Optional: logOptions object
@@ -82,19 +85,58 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 // Log in to Discord with your client's token
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);
 ```
 
 ### Delete a guild-command
 
 There are two options to do this: Either with the command's ID or his name.
 
-In this example we are building a manager-command that has a StringOption for the command where one can paste in the ID or the name.\
+In this example we are building a manager-command that has StringOptions for the command and the guild id where one can paste in the ID or the name.\
 
-```js
-const 
-```
+````js
+const { SlashCommandBuilder } = require("discord.js");
 
+module.exports = {
+    guildIds: ["the-id-of-my-private-guild"],
+    data: new SlashCommandBuilder()
+        .setName("manage-commands")
+        .setDescription("Replies with Pong!")
+        .addStringOption((op) =>
+            op
+                .setName("command")
+                .setDescription(
+                    "The command's ID or name to be removed in the given server"
+                )
+        )
+        .addStringOption((op) =>
+            op
+                .setName("server-id")
+                .setDescription("The server's ID to remove the command from")
+        ),
+
+    // The function to call whenever the command is executed (Doesnt matter when calling client.deployCommands())
+    async run(interaction) {
+        const serverId = ctx.options.getString("server-id");
+        const command = ctx.options.getString("command");
+        await interaction.deferReply({ ephemeral: true })
+        try {
+            await interaction.client.deleteGuildCommand(command, serverId);
+        } catch (err) {
+            console.error("Command not deleted due to", err);
+            return await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle("❌ Command not deleted due to an error")
+                        .setDescription('```' + err + '```')
+                        .setColor(0xee0000);
+                ]
+            });
+        }
+        await interaction.editReply("✅ Command deleted");
+    },
+};
+````
 
 #### `logOptions`
 
@@ -109,7 +151,7 @@ const
 
 ### TODO
 
--   [ ] L164 | Add support for sharding
+-   [ ] L168 | Add support for sharding
 
 -   [ ] Finish `this.deleteCommand`
 
