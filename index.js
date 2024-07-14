@@ -86,7 +86,7 @@ module.exports = class cDClient extends Client {
 
         let rest;
         if (this.token) {
-            rest = client.rest;
+            rest = this.rest;
         } else {
             rest = new REST().setToken(token);
         }
@@ -98,10 +98,10 @@ module.exports = class cDClient extends Client {
                 );
 
             // TODO: Update it to client.application.commands and fetch
-            let currentCommands = client.application.commands.cache;
+            let currentCommands = this.application.commands.cache;
             if (!currentCommands)
-                if (client) {
-                    currentCommands = await client.application.commands.fetch();
+                if (this) {
+                    currentCommands = await this.application.commands.fetch();
                 } else {
                     currentCommands = await rest.get(
                         `/applications/${clientId}/commands`
@@ -157,7 +157,7 @@ module.exports = class cDClient extends Client {
 
             if (logUpdates)
                 console.log(`🔁 Updating ${updated.length} global commands...`);
-            data = await rest.put(`/applications/${client.id}/commands`, {
+            data = await rest.put(`/applications/${clientId}/commands`, {
                 body: updated,
             });
             if (logUpdates)
@@ -172,10 +172,10 @@ module.exports = class cDClient extends Client {
 
                 // TODO: Only do this, if the client is present so that no client is needed
                 // Wait for the guilds to cache before continuing
-                while (!client.guilds.cache.size) {
+                while (!this.guilds.cache.size) {
                     await new Promise((resolve) => setTimeout(resolve, 1000));
                 }
-                clientGuilds = client.guilds.cache;
+                clientGuilds = this.guilds.cache;
 
                 if (logUpdates) console.log(`🔁 Updating guild commands...`);
                 let updatedPrivates = 0;
