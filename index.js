@@ -45,7 +45,7 @@ class cDClient extends Client {
             return;
         }
 
-        const clientId = this.user.id;
+        const clientId = this.application.id;
         let commands = [];
         let privateCommands = [];
 
@@ -57,9 +57,9 @@ class cDClient extends Client {
         for (const file of commandFiles) {
             const filePath = path.join(commandsPath, file);
             const command = require(filePath);
-            if (!("data" in command) || !("run" in command)) {
+            if (!("data" in command)) {
                 console.error(
-                    `- Command '${command.name}' is missing the 'data' or 'run' property!`
+                    `- Command '${command.name}' is missing the 'data' property!`
                 );
                 continue;
             } else if (Boolean(command.ignore || false)) {
@@ -68,7 +68,7 @@ class cDClient extends Client {
                 continue;
             }
 
-            if ((command.guildIds || []).length > 0) {
+            if ((command.guildIds ?? []).length > 0) {
                 privateCommands.push({
                     data: command.data,
                     guildIds: command.guildIds,
@@ -91,21 +91,29 @@ class cDClient extends Client {
                     `🔁 Started refreshing ${commands.length} global and ${privateCommands.length} guild commands.`
                 );
 
-            // TODO: Fix that currentCommands is correct
             let currentCommands = this.application.commands.cache;
+            console.log(currentCommands);
             if (!currentCommands.size)
                 if (this.isReady()) {
-                    currentCommands = await this.application.commands.fetch();
+                    currentCommands = await this.application.commands.fetch({
+                        cache: true,
+                    });
+                    console.log("1", currentCommands);
                 } else {
                     currentCommands = await rest.get(
                         `/applications/${clientId}/commands`
                     );
+                    console.log("2", currentCommands);
                 }
 
             const _new = [];
             const updated = [];
             const toDelete = [];
 
+            currentCommands.forEach((cmd) =>
+                console.log("currentCommand", cmd)
+            );
+            commands.forEach((cmd) => console.log("command", cmd));
             // Initialising
             for (const command of commands) {
                 if (!currentCommands.some((c) => c.name == command.name)) {
@@ -143,11 +151,15 @@ class cDClient extends Client {
 
             if (logOptions.status)
                 console.log(`🔁 Creating ${_new.length} global commands...`);
+            _new.forEach((cmd) => console.log("_new", cmd));
+            console.log("rest", rest);
+            console.log("token", rest.token);
             for (let cmd of _new) {
                 data = await rest.post(`/applications/${clientId}/commands`, {
                     body: cmd,
                 });
-                if (logOptions.created) console.log(`✔️ Created '${cmd.name}'`);
+                if (logOptions.created)
+                    console.log(`✔️ Created '${data.name}'`);
             }
 
             if (logOptions.status)
