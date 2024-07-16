@@ -155,9 +155,14 @@ class cDClient extends Client {
             console.log("rest", rest);
             console.log("token", rest.token);
             for (let cmd of _new) {
-                data = await rest.post(`/applications/${clientId}/commands`, {
-                    body: cmd,
-                });
+                // The `cmd` variable is 100% correct - checked it
+                // Using built-in
+                data = await this.application.commands.create(cmd);
+
+                // Using REST
+                // data = await rest.post(`/applications/${clientId}/commands`, {
+                //     body: cmd,
+                // });
                 if (logOptions.created)
                     console.log(`✔️ Created '${data.name}'`);
             }
