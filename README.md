@@ -5,8 +5,8 @@ A simple, easy to use module that houses functions to can refresh global and gui
 ## Installation
 
 ```bash
-npm install git+ssh://git@github.com:The-LukeZ/djsCommandDeployer.git
-npm install djs-command-deployer
+npm install git+ssh://git@github.com:The-LukeZ/djsCommandHelper.git
+npm install djs-command-helper
 ```
 
 ## Usage
