@@ -1,5 +1,5 @@
 {
-  "name": "djs-command-deployer",
+  "name": "djs-command-helper",
   "version": "2.0.0",
   "description": "",
   "main": "./index.js",

@@ -64,25 +64,28 @@ module.exports = {
 ### Deploy the commands
 
 ```js
-const { Events, GatewayIntentBits } = require("discord.js");
-// Name it whatever you want
-const Client = require("djs-command-deployer");
-const { join: pathJoin } = require("node:path");
-require("dotenv").config();
+// Don't forget to load all things from discord.js
 
-// Set up your client ; use the guide for example (https://discordjs.guide/creating-your-bot/main-file)
+const { deployCommands } = require("djs-command-deployer");
+const path = require("node:path");
+require("dotenv").config(); // load your token and app's id
 
-// Create a new client instance
-let client = new Client({ intents: [GatewayIntentBits.Guilds] });
+// Set up your client
+// Use the guide as an example if you need help
+// https://discordjs.guide/creating-your-bot/main-file
 
-// When the client is ready, run this code (only once).
+// When the client is ready, run this code once.
 client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
     // Call deployCommands to refresh your commands
-    readyClient.deployCommands(
-        pathJoin(__dirname, "commands", "utility")
-        // Optional: logOptions object
+    deployCommands(
+        path.join(__dirname, "commands", "utility")
+        {
+            appToken: process.env.DISCORD_TOKEN,
+            appId: process.env.ClientId,
+        }
+        // logs are optional
     );
 });
 
@@ -92,29 +95,65 @@ client.login(process.env.DISCORD_TOKEN);
 
 ### Delete a guild-command
 
-There are two options to do this: Either with the command's ID or his name.
+The name of a command of an application is unique, but only in its type.
+Make sure that **you** have command's id and not it's name.
 
-In this example we are building a manager-command that has StringOptions for the command and the guild id where one can paste in the ID or the name.\
+In this example we are building a manager-command that has StringOptions for the command and the guild id where one can paste in the ID or the name.
 
-Please see [the example code](https://github.com/The-LukeZ/djs-command-deployer-tests/blob/main/commands/command.js) for the command file and the [`index.js`](https://github.com/The-LukeZ/djs-command-deployer-tests/blob/main/index.js) on how to do this in general.
+````js
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { deleteCommand } = require("djs-command-helper");
 
-#### `logOptions`
+module.exports = {
+    guildIds: ["1114825999155200101"],
+    data: new SlashCommandBuilder()
+        .setName("manage-commands")
+        .setDescription("Replies with Pong!")
+        .addStringOption((op) =>
+            op
+                .setName("command-id")
+                .setDescription(
+                    "The ID of the command to be removed"
+                )
+        )
+        .addStringOption((op) =>
+            op
+                .setName("server-id")
+                .setDescription("The ID of the server from which the command is to be removed")
+        ),
 
-| Option name | Description / Example                            | Default |
-| ----------- | ------------------------------------------------ | ------- |
-| `status`    | Logs like `Started refreshing X global commands` | `true`  |
-| `ignored`   | Logs like `Command 'user' ignored`               | `true`  |
-| `created`   | Logs like `Created 'user'`                       | `true`  |
-| `updated`   | Logs like `Updated 'user'`                       | `true`  |
-| `deleted`   | Logs like `Deleted 'user'`                       | `true`  |
-| `noLogs`    | No logs at all (besides errors)                  | `false` |
+    // This function is called whenever an interactionCreate event is triggered.
+    async run(interaction) {
+        const guildId = interaction.options.getString("server-id");
+        const command = interaction.options.getString("command-id");
+        await interaction.deferReply({ ephemeral: true }); // Defer to remove the risk of not responding in time
 
-### TODO
+        
+        try {
+            const response = await deleteCommand(command, {
+                appToken: interaction.client.token,
+                appId: interaction.application.id,
+                guildId: guildId,
+            });
+        } catch (err) {  // respond with an error if the operation fails in some way
+            return await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle("❌ Command not deleted due to an error")
+                        .setDescription("```" + err + "```")
+                        .setColor(0xee0000),
+                ],
+            });
+        }
 
--   [ ] L94 | Fix that currentCommands is correct (currently doesn't work and therefore checking for current commands doesn't really work)
-
--   [ ] L166 | Add support for sharding
-
--   [ ] Finish `this.deleteCommand`
-
-Feel free to help me with the TODOs, I will merge any useful pull requests :)
+        // Success!
+        await interaction.editReply({
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle("✅ Command deleted")
+                    .setColor(0x44ff44),
+            ],
+        });
+    },
+};
+````

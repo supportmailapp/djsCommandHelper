@@ -18,10 +18,24 @@ const Routes = {
 };
 
 /**
- * @typedef {Object} ClientData
- * @property {string} token - The token of your Discord bot.
- * @property {string} id - The ID of your Discord bot.
+ * @typedef {Object} deployOptions
+ * @property {string} appToken - The token of your Discord bot.
+ * @property {string} appId - The ID of your Discord bot.
+ * @property {boolean?} logs Whether to log what command was ignored, created, updated or deleted
  */
+
+/**
+ * @typedef {Object} DeleteOptions
+ * @property {string} appToken The token of your Discord bot.
+ * @property {string} appId The ID of your Discord bot.
+ * @property {string | null} guildId The guild's ID to delete the command in (not needed for a global command)
+ */
+
+const DEFAULT_OPTS = {
+    appToken: "",
+    appId: "",
+    logs: true,
+};
 
 /**
  * Create, update and delete global and guild application commands.
@@ -30,16 +44,15 @@ const Routes = {
  * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
  *
  * @param {string} folderPath The absolute path to your commands folder (the command files have to be directly in it!)
- * @param {boolean} logs Whether to log what command was ignored, created, updated or deleted
- * @param {ClientData} clientDetails The client's details
+ * @param {deployOptions} opts the appId, appToken and if the actions should be logged
  * @returns {Promise<boolean>} `true` if the operation was successfull. Otherwise `false`.
  */
 module.exports.deployCommands = async function deployCommands(
     folderPath,
-    logs = false,
-    clientDetails
+    opts = DEFAULT_OPTS
 ) {
-    const clientId = clientDetails.id;
+    opts = Object.assign({}, DEFAULT_OPTS, opts || {});
+    const clientId = opts.appId;
 
     let commands = [];
     let privateCommands = [];
@@ -48,7 +61,8 @@ module.exports.deployCommands = async function deployCommands(
         file.endsWith(".js")
     );
 
-    if (logs) console.log(`🔁 Started refreshing global and guild commands.`);
+    if (opts.logs)
+        console.log(`🔁 Started refreshing global and guild commands.`);
 
     try {
         const currentCommands = await rest.get(Routes.commands(clientId));
@@ -66,7 +80,7 @@ module.exports.deployCommands = async function deployCommands(
                 );
                 continue;
             } else if ("data" in command && Boolean(command.ignore ?? false)) {
-                if (logs)
+                if (opts.logs)
                     console.log(`- Command '${command.name}' is ignored!`);
                 continue;
             }
@@ -81,19 +95,20 @@ module.exports.deployCommands = async function deployCommands(
             }
         }
 
-        const rest = new REST().setToken(clientDetails.token);
+        const rest = new REST().setToken(opts.token);
 
         let data;
 
         data = await rest.put(Routes.commands(clientId), { body: commands });
-        if (logs) console.log(`✅ Global commands '${data.length}' refreshed`);
+        if (opts.logs)
+            console.log(`✅ Global commands '${data.length}' refreshed`);
 
         for (let cmd of privateCommands) {
             for (let gid of cmd.guildIds) {
                 data = await rest.post(Routes.guildCommands(clientId, gid), {
                     body: cmd.data,
                 });
-                if (logs)
+                if (opts.logs)
                     console.log(`✅ Guild command '${data.name}' refreshed`);
             }
         }
@@ -107,51 +122,23 @@ module.exports.deployCommands = async function deployCommands(
 /**
  * Shortcut method to delete an application command by its name or ID. **The client needs to be logged in!**
  *
- * @param {string} command The commands's name or ID
- * @param {string | null} guildId The guild's ID to delete the command in (not needed for a global command)
- * @param {ClientData} clientDetails The client's details
- * @returns {Promise<boolean>} `true` if the operation was successfull. Otherwise `false`.
+ * @param {string} commandId The commands id. Note, that command names can only be unique among their command type.
+ * @param {DeleteOptions} opts the bot's token, ID and the guildId (if applicable)
+ * @returns {Promise<void>}
  */
-module.exports.deleteCommand = async function deleteCommand(
-    command,
-    guildId = null,
-    clientDetails
-) {
-    const commandPath = (cmdId, guildId = null) => {
-        if (guildId)
-            return Routes.guildCommand(clientDetails.id, guildId, cmdId);
-        return Routes.command(clientDetails.id, cmdId);
-    };
+module.exports.deleteCommand = async function deleteCommand(commandId, opts) {
+    const guildId = opts.guildId ?? null;
 
-    try {
-        const rest = new REST().setToken(clientDetails.token);
+    const commandPath = guildId
+        ? Routes.guildCommand(opts.appId, guildId, commandId)
+        : Routes.command(opts.appId, commandId);
 
-        if (/^\d+$/i.test(command)) {
-            await rest.delete(commandPath(command, guildId));
-        } else {
-            const theCommand =
-                this.application.commands.cache.get(command) ??
-                (await this.application.commands.fetch({
-                    guildId: guildId,
-                    cache: true,
-                }));
-
-            if (!theCommand) {
-                console.error(
-                    `❌ Command '${command}' not found in guild '${guildId}'`
-                );
-                return;
-            }
-
-            await rest.delete(commandPath(theCommand.id, guildId));
-            if (logs) console.log(`✅ Guild command '${data.name}' deleted`);
-        }
-        return true;
-    } catch (err) {
-        console.error(
-            `❌ Error while deleting a command in guild '${guildId}':`,
-            err
-        );
-        return false;
+    if (commandId.match(/^\d+$/i)) {
+        await new REST()
+            .setToken(opts.appToken)
+            .delete(commandPath(commandId, guildId));
+    } else {
+        throw new Error("command id is not a bigInt!");
     }
+    return;
 };
