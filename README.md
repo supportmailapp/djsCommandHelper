@@ -1,4 +1,4 @@
-# djsCommandDeployer
+# djsCommandHelper
 
 A simple, easy to use module that houses functions to can refresh global and guild specific commands for your Discord App.
 
