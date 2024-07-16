@@ -1,6 +1,6 @@
 # djsCommandDeployer
 
-A simple, easy to use module that houses a Discord Client class that has two additional functions that can create, update and delete global and guild specific commands for your Discord App.
+A simple, easy to use module that houses functions to can refresh global and guild specific commands for your Discord App.
 
 ## Installation
 
