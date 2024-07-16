@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "",
   "main": "./index.js",
-  "scripts": { },
+  "scripts": {},
   "keywords": [
     "discord",
     "discord.js",
@@ -21,9 +21,6 @@
   },
   "registry": "https://npm.pkg.github.com",
   "dependencies": {
-    "discord.js": "^14.15.3"
-  },
-  "devDependencies": {
-    "dotenv": "^16.4.5"
+    "@discordjs/rest": "^2.3.0"
   }
 }
