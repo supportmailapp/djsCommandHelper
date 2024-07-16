@@ -65,7 +65,7 @@ module.exports.deployCommands = async function deployCommands(
         console.log(`🔁 Started refreshing global and guild commands.`);
 
     try {
-        const rest = new REST().setToken(opts.token);
+        const rest = new REST().setToken(opts.appToken);
 
         const currentCommands = await rest.get(Routes.commands(clientId));
         let currentMap = new Map();
@@ -74,7 +74,7 @@ module.exports.deployCommands = async function deployCommands(
         });
 
         for (const file of commandFiles) {
-            const filePath = path.join(filePath, file);
+            const filePath = path.join(folderPath, file);
             const command = require(filePath);
             if (!("data" in command)) {
                 console.error(
@@ -83,7 +83,7 @@ module.exports.deployCommands = async function deployCommands(
                 continue;
             } else if ("data" in command && Boolean(command.ignore ?? false)) {
                 if (opts.logs)
-                    console.log(`- Command '${command.name}' is ignored!`);
+                    console.log(`- Command '${command.data.name}' is ignored!`);
                 continue;
             }
 
@@ -101,7 +101,7 @@ module.exports.deployCommands = async function deployCommands(
 
         data = await rest.put(Routes.commands(clientId), { body: commands });
         if (opts.logs)
-            console.log(`✅ Global commands '${data.length}' refreshed`);
+            console.log(`✅ ${data.length} global commands refreshed`);
 
         for (let cmd of privateCommands) {
             for (let gid of cmd.guildIds) {
