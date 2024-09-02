@@ -1,9 +1,9 @@
 {
   "name": "djs-command-helper",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "description": "A simple, easy to use module that houses functions to can refresh global and guild specific commands for your Discord App.",
   "main": "./index.js",
-  "scripts": { },
+  "scripts": {},
   "keywords": [
     "discord",
     "discord.js",
@@ -17,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/The-LukeZ/djsCommandDeployer.git"
+    "url": "https://github.com/The-LukeZ/djsCommandHelper.git"
   },
   "registry": "https://npm.pkg.github.com",
   "dependencies": {

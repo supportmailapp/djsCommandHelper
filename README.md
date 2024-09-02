@@ -95,8 +95,14 @@ client.login(process.env.DISCORD_TOKEN);
 
 ### Delete a guild-command
 
-The name of a command of an application is unique, but only in its type.
-Make sure that **you** have command's id and not it's name.
+Global commands can be automatically deleted if you just delete the file or set `ignore: true` and run the `deployCommands` function again.
+
+Guild commands on the other hand need to be deleted manually.
+
+The name of a command of an application is unique, but only in its type. Command ids are unique.
+Make sure that you have command's id and not it's name.
+
+You can get the command id by either typing in the command and then right click the description above or by giong into the guild settings > Integrations > YOUR_BOT > right mouse click on the command > **Copy Command ID**
 
 In this example we are building a manager-command that has StringOptions for the command and the guild id where one can paste in the ID or the name.
 
@@ -105,21 +111,21 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { deleteCommand } = require("djs-command-helper");
 
 module.exports = {
-    guildIds: ["1114825999155200101"],
+    guildIds: ["12345"], // the guild id of the dev's guild so that no one can delete every command
     data: new SlashCommandBuilder()
         .setName("manage-commands")
         .setDescription("Replies with Pong!")
         .addStringOption((op) =>
             op
                 .setName("command-id")
-                .setDescription(
-                    "The ID of the command to be removed"
-                )
+                .setDescription("The ID of the command to be removed")
         )
         .addStringOption((op) =>
             op
                 .setName("server-id")
-                .setDescription("The ID of the server from which the command is to be removed")
+                .setDescription(
+                    "The ID of the server from which the command is to be removed"
+                )
         ),
 
     // This function is called whenever an interactionCreate event is triggered.
@@ -128,20 +134,20 @@ module.exports = {
         const command = interaction.options.getString("command-id");
         await interaction.deferReply({ ephemeral: true }); // Defer to remove the risk of not responding in time
 
-        
         try {
             const response = await deleteCommand(command, {
                 appToken: interaction.client.token,
                 appId: interaction.application.id,
                 guildId: guildId,
             });
-        } catch (err) {  // respond with an error if the operation fails in some way
+        } catch (err) {
+            // respond with an error if the operation fails in some way
             return await interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("❌ Command not deleted due to an error")
                         .setDescription("```" + err + "```")
-                        .setColor(0xee0000),
+                        .setColor(0xff0000),
                 ],
             });
         }

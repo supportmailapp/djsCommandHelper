@@ -1,4 +1,4 @@
-const { REST } = require("@discordjs/rest");
+const REST = require("@discordjs/rest");
 const { readdirSync } = require("node:fs");
 const path = require("node:path");
 
@@ -10,10 +10,10 @@ const Routes = {
         return `/applications/${appId}/commands/${cmdId}`;
     },
     guildCommands: (appId, guildId) => {
-        return `/applications/${appId}/commands/guilds/${guildId}/commands`;
+        return `/applications/${appId}/guilds/${guildId}/commands`;
     },
     guildCommand: (appId, guildId, cmdId) => {
-        return `/applications/${appId}/commands/guilds/${guildId}/commands/${cmdId}`;
+        return `/applications/${appId}/guilds/${guildId}/commands/${cmdId}`;
     },
 };
 
@@ -67,12 +67,6 @@ module.exports.deployCommands = async function deployCommands(
     try {
         const rest = new REST().setToken(opts.appToken);
 
-        const currentCommands = await rest.get(Routes.commands(clientId));
-        let currentMap = new Map();
-        currentCommands.forEach((cmd) => {
-            currentMap.set(cmd.name, cmd);
-        });
-
         for (const file of commandFiles) {
             const filePath = path.join(folderPath, file);
             const command = require(filePath);
@@ -87,7 +81,7 @@ module.exports.deployCommands = async function deployCommands(
                 continue;
             }
 
-            if ((command.guildIds ?? []).length > 0) {
+            if ((command.guildIds || []).length > 0) {
                 privateCommands.push({
                     data: command.data,
                     guildIds: command.guildIds,
