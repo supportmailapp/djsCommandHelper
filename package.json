@@ -3,6 +3,7 @@
   "version": "3.0.1",
   "description": "A simple, easy to use module that houses functions to can refresh global and guild specific commands for your Discord App.",
   "main": "./index.js",
+  "types": "./types.d.ts",
   "scripts": {},
   "keywords": [
     "discord",
@@ -11,7 +12,8 @@
     "d.js",
     "command",
     "commands",
-    "deploy"
+    "deploy",
+    "helper"
   ],
   "author": "The-LukeZ",
   "license": "MIT",
@@ -20,7 +22,9 @@
     "url": "https://github.com/The-LukeZ/djsCommandHelper.git"
   },
   "registry": "https://npm.pkg.github.com",
-  "dependencies": {
-    "@discordjs/rest": "^2.3.0"
+  "devDependencies": {
+    "@discordjs/rest": "^2.4.0",
+    "@types/node": "^22.7.4",
+    "discord-api-types": "^0.37.101"
   }
 }
