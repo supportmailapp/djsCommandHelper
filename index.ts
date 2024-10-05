@@ -1,7 +1,7 @@
 import { REST } from "@discordjs/rest";
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import { DeleteOptions, DeployOptions } from "./types";
+import { DeleteOptions, DeployOptions } from "./types.js";
 
 const Routes = {
   commands: (appId: string): `/${string}` => {
