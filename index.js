@@ -22,7 +22,8 @@ const Routes = {
  * Otherwise the check for a guild ID is omitted, and you could make pointless requests which can also result in an error
  */
 export async function deployCommands(folderPath, opts) {
-    var _a;
+    var _a, _b;
+    opts.logs = (_a = opts.logs) !== null && _a !== void 0 ? _a : true;
     if (!opts.appToken || !opts.appId) {
         throw new Error("Missing 'appToken' or 'appId' in 'opts'!");
     }
@@ -34,13 +35,13 @@ export async function deployCommands(folderPath, opts) {
     try {
         const rest = new REST().setToken(opts.appToken);
         for (const file of commandFiles) {
-            const filePath = path.join(folderPath, file);
+            const filePath = "file://" + path.join(folderPath, file);
             const command = (await import(filePath)).default;
             if (!("data" in command)) {
                 console.error(`- Command '${command.name}' is missing the 'data' property!`);
                 continue;
             }
-            else if ("data" in command && Boolean((_a = command.ignore) !== null && _a !== void 0 ? _a : false)) {
+            else if ("data" in command && Boolean((_b = command.ignore) !== null && _b !== void 0 ? _b : false)) {
                 if (opts.logs)
                     console.log(`- Command '${command.data.name}' is ignored!`);
                 continue;

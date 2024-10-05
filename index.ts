@@ -32,9 +32,11 @@ export async function deployCommands(
   folderPath: string,
   opts: DeployOptions
 ): Promise<boolean> {
+  opts.logs = opts.logs ?? true;
   if (!opts.appToken || !opts.appId) {
     throw new Error("Missing 'appToken' or 'appId' in 'opts'!");
   }
+
   let commands = [];
   let privateCommands = [];
 
@@ -49,7 +51,7 @@ export async function deployCommands(
     const rest = new REST().setToken(opts.appToken);
 
     for (const file of commandFiles) {
-      const filePath = path.join(folderPath, file);
+      const filePath = "file://" + path.join(folderPath, file);
       const command = (await import(filePath)).default;
       if (!("data" in command)) {
         console.error(
