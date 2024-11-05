@@ -23,6 +23,7 @@ jspm_packages/
 
 # Output directories
 dist/
+index.js
 build/
 
 # IDE specific files
