@@ -2,7 +2,7 @@
   "name": "djs-command-helper",
   "version": "4.1.0",
   "description": "A simple, easy to use module that houses functions to can refresh global and guild specific commands for your Discord App.",
-  "main": "./index.js",
+  "main": "./index.ts",
   "types": "./types.d.ts",
   "type": "module",
   "scripts": { },
