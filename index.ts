@@ -53,7 +53,7 @@ export async function deployCommands(
     for (const file of commandFiles) {
       const filePath = "file://" + path.join(folderPath, file);
       const command = (await import(filePath)).default;
-      if (!("data" in command)) {
+      if (typeof command != "object" || !("data" in command)) {
         console.error(
           `- Command '${command.name}' is missing the 'data' property!`
         );
