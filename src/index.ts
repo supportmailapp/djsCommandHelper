@@ -1,7 +1,7 @@
 import { REST } from "@discordjs/rest";
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import { DeleteOptions, DeployOptions } from "./types.js";
+import { DeleteOptions, DeployOptions } from "../types.js";
 
 const Routes = {
   commands: (appId: string): `/${string}` => {
@@ -33,6 +33,7 @@ export async function deployCommands(
   opts: DeployOptions
 ): Promise<boolean> {
   opts.logs = opts.logs ?? true;
+  const FILE_EXTENSION = opts.fileExtension ?? ".js";
   if (!opts.appToken || !opts.appId) {
     throw new Error("Missing 'appToken' or 'appId' in 'opts'!");
   }
@@ -41,7 +42,7 @@ export async function deployCommands(
   let privateCommands = [];
 
   const commandFiles = readdirSync(folderPath).filter((file) =>
-    file.endsWith(".js")
+    file.endsWith(FILE_EXTENSION)
   );
 
   if (opts.logs)

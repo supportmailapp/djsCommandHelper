@@ -13,6 +13,14 @@ export interface DeployOptions {
    * @default true
    */
   logs?: boolean;
+  /**
+   * The file extension of the command files to be deployed.
+   *
+   * This can be useful in development environments where you might use `tsx` which allows you to use TypeScript files directly.
+   *
+   * @default ".js"
+   */
+  fileExtension?: `.${string}`;
 }
 
 export interface DeleteOptions {
