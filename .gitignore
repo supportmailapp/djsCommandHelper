@@ -21,10 +21,6 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# Output directories
-dist/
-build/
-
 # IDE specific files
 .vscode/
 .idea/
