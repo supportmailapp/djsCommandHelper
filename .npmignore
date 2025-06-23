@@ -1,0 +1,14 @@
+# Source files (compiled to dist/)
+src/
+
+# Config files
+tsconfig.json
+.gitignore
+
+# Lock files
+package-lock.json
+
+# Development files
+.github/
+
+# Keep dist/ and types.d.ts (these are needed for the package)
